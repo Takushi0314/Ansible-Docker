@@ -1,0 +1,85 @@
+- hosts: all
+  user: username
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: yum -y update
+      yum:
+        name: '*'
+        state: latest
+
+    - name: remove docker
+      yum: name={{ item }} state=removed
+      with_items:
+          - docker
+          - docker-common
+          - docker-selinux
+          - docker-engine
+          - docker-client
+          - docker-client-latest
+          - docker-latest
+          - docker-latest-logrotate
+          - docker-logrotate
+          - docker-engine-selinux
+          - docker-engine
+
+    - name: install docker required packages
+      yum: name={{ item }} state=installed
+      with_items:
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+
+    - name: add repository docker
+      command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: update package index (shell)
+      command: yum makecache fast
+
+    - name: yum -y update
+      yum:
+        name: '*'
+        state: latest
+
+    - name: install docker 
+      yum: name={{ item }} state=installed
+      with_items:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+
+    - name: install dokcer-compose(shell)
+      shell: sh -c "curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
+
+    - name: give to docker-compose exec permission
+      command: chmod +x /usr/local/bin/docker-compose
+
+    - name: start docker service
+      systemd:
+        name: docker
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
+
+        #  - name: install python repository
+        #    yum: name={{ item }} state=installed
+        #    with_items:
+        #        - https://centos7.iuscommunity.org/ius-release.rpm
+
+        #  - name: install python 3.6
+        #    yum: name={{ item }} state=installed
+        #    with_items:
+        #        - python36u
+        #        - python36u-pip
+        #        - python36u-devel
+
+        #  - name: pip3 upgrade
+        #    command: pip3.6 install --upgrade pip
+
+    - name: install python module docker
+      pip:
+        name:
+          - docker
+          - docker-compose
+          - pyyaml
+        state: present

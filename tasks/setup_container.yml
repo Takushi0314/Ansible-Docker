@@ -1,0 +1,34 @@
+- hosts: test
+  user: username
+  gather_facts: no
+  tasks:
+    - name: Create a jenkins home
+      file: path=/var/docker/jenkins state=directory owner=desktop group=desktop mode=0755
+      become: yes
+
+    - name: Add the group dcoker
+      become: yes
+      user:
+        name: desktop
+        groups: desktop, docker, wheel
+        append: yes
+
+    - name: Open jenkins port for host 8080
+      become: yes
+      firewalld: permanent=true port=8080/tcp state=enabled immediate=yes
+      
+    - name: Open jenkins port for host 50000
+      become: yes
+      firewalld: permanent=true port=50000/tcp state=enabled immediate=yes
+
+    - name: create a jenkins container
+      # docker run -p 8080:8080 -p 50000:50000 -v /var/docker/jenkins:/var/jenkins_home jenkins/jenkins:lts
+      docker_container:
+        name: jenkins
+        image: jenkins/jenkins:lts
+        state: started
+        ports:
+          - 8080:8080
+          - 50000:50000
+        volumes:
+          - /var/docker/jenkins:/var/jenkins_home
