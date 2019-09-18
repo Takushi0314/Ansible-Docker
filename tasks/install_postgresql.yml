@@ -1,0 +1,37 @@
+- hosts: db
+  gather_facts: no
+  become: true
+  become_method: su
+  vars_files:
+    - ../vars_files/postgresql.yml
+  tasks:
+    - name: install yum repository
+      yum:
+        name: {{ postgresql_repo }}
+    
+    - name: install postgresql
+      yum: name={{ item }}
+      with_items:
+        - postgresql{{ postgresql_version }}-devel
+        - postgresql{{ postgresql_version }}-libs
+        - postgresql{{ postgresql_version }}-server
+        - python-psycopg2
+
+    - name: add postgresql to path
+      lineinfile:
+        dest: /etc/environment
+        state: present
+        backrefs: yes
+        regexp: 'PATH=(["]*)((?!.*?/usr/pgsql-{{ postgresql_version}}/bin).*?)(["]*)$'
+        line: "PATH=\1\2:{{extra_path}}\3"
+
+    - name: init db
+      shell: "/usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }} initdb"
+      args:
+        creates: /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf
+
+    - name: regist systemd
+      systemd:
+         name: postgresql-{{ postgresql_version }}
+         state: restarted
+         daemon_reload: yes
