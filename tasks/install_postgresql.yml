@@ -1,32 +1,24 @@
 - hosts: db
   gather_facts: no
   become: true
-  become_method: su
+  user: test
   vars_files:
-    - ../vars_files/postgresql.yml
+    - ../vars_files/vars.yml
   tasks:
     - name: install yum repository
       yum:
-        name: {{ postgresql_repo }}
+        name: "{{ postgresql_repo }}"
     
     - name: install postgresql
       yum: name={{ item }}
       with_items:
-        - postgresql{{ postgresql_version }}-devel
-        - postgresql{{ postgresql_version }}-libs
-        - postgresql{{ postgresql_version }}-server
-        - python-psycopg2
-
-    - name: add postgresql to path
-      lineinfile:
-        dest: /etc/environment
-        state: present
-        backrefs: yes
-        regexp: 'PATH=(["]*)((?!.*?/usr/pgsql-{{ postgresql_version}}/bin).*?)(["]*)$'
-        line: "PATH=\1\2:{{extra_path}}\3"
+        - postgresql{{ postgresql_version_except_dot }}-devel
+        - postgresql{{ postgresql_version_except_dot }}-libs
+        - postgresql{{ postgresql_version_except_dot }}-server
+        # - python-psycopg2 # ansibleでdb設定するのであれば必要
 
     - name: init db
-      shell: "/usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }} initdb"
+      shell: "/usr/pgsql-{{ postgresql_version }}/bin/postgresql{{ postgresql_version_except_dot }}-setup initdb"
       args:
         creates: /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf
 

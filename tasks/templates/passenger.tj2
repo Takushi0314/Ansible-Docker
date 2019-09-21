@@ -1,0 +1,14 @@
+{{ httpd_conf_snippet.stdout }}
+
+<VirtualHost *:80>
+#   ServerName {{ ansible_hostname }}
+
+   DocumentRoot {{ application_root }}/public
+   <Directory {{ application_root }}/public>
+      RailsEnv {{ rails_env }}
+      AllowOverride all
+      Options -MultiViews
+      # Uncomment this if you're on Apache >= 2.4:
+      # Require all granted
+   </Directory>
+</VirtualHost>

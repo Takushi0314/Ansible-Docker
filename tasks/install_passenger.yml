@@ -1,0 +1,61 @@
+- hosts: ap
+  user: test
+  gather_facts: yes
+  vars_files:
+    - ../vars_files/vars.yml
+  tasks:
+    - name: install rbenv-install
+      shell: bash -lc 'CONFIGURE_OPTS="--disable-install-rdoc" rbenv install -s {{ ruby_version }}'
+
+    - name: config global ruby version
+      shell: bash -lc "rbenv global {{ ruby_version }} && rbenv rehash"
+
+    - name: install bundler
+      gem:
+        name: bundler
+        version: "{{ bundler_version }}"
+        user_install: false
+        executable: "{{ ansible_env.HOME }}/.rbenv/shims/gem"
+
+    - name: install passenger
+      gem:
+        name: passenger
+        version: "{{ passenger_version }}"
+        user_install: false
+        executable: "{{ ansible_env.HOME }}/.rbenv/shims/gem"
+    
+    - name: rbenv rehash
+      shell: bash -lc "rbenv rehash"
+
+    - name: install passenger-apache2 require module
+      yum: name={{ item }}
+      become: true
+      with_items:
+        - gcc
+        - gcc-c++
+        - curl-devel
+        - zlib
+        - openssl
+        - openssl-devel
+        - httpd-devel
+        - apr-devel
+        - apr-util-devel
+
+    - name: passenger-install-apache2-module --auto --languages=ruby
+      shell: bash -lc "passenger-install-apache2-module --auto --languages=ruby"
+
+    - name: get passenger-apache2 config
+      shell: bash -lc "passenger-install-apache2-module --snippet"
+      register: httpd_conf_snippet
+
+    - name: generate passenger.conf and deploy
+      become: true
+      template:
+        src: passenger.tj2
+        dest: /etc/httpd/conf.d/passenger.conf
+
+    - name: restart httpd
+      become: true
+      systemd:
+        name: httpd
+        state: restarted

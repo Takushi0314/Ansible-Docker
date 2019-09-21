@@ -1,5 +1,5 @@
 - hosts: test
-  user: username
+  user: test
   gather_facts: no
   tasks:
     - name: Create a jenkins home
@@ -13,11 +13,11 @@
         groups: desktop, docker, wheel
         append: yes
 
-    - name: Open jenkins port for host 8080
+    - name: Open jenkins port for host
       become: yes
       firewalld: permanent=true port=8080/tcp state=enabled immediate=yes
       
-    - name: Open jenkins port for host 50000
+    - name: Open jenkins port for host
       become: yes
       firewalld: permanent=true port=50000/tcp state=enabled immediate=yes
 

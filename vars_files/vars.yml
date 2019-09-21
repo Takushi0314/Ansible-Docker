@@ -1,0 +1,15 @@
+postgresql_version: 9.4
+postgresql_version_except_dot: 94
+# https://yum.postgresql.org/
+postgresql_repo: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+
+httpd_version: 2.4.6
+
+ruby_version: 2.5.1
+
+bundler_version: 1.17.3
+
+passenger_version: 5.2.0
+
+application_root: /var/apps/test_app1
+rails_env: test

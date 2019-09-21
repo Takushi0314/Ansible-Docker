@@ -1,2 +1,8 @@
-[test]
-# Add your host ip address
+[db]
+test.co.jp
+
+[web]
+test.co.jp
+
+[ap]
+test.co.jp

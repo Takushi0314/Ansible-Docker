@@ -1,0 +1,38 @@
+- hosts: ap
+  user: test
+  gather_facts: yes
+  vars_files:
+    - ../vars_files/vars.yml
+  tasks:
+    - name: install dependency library
+      become: true
+      yum: name={{ item }}
+      with_items:
+        - git
+        - bzip2
+        - gcc
+        - gcc-c++
+        - openssl-devel
+        - readline-devel
+        - zlib-devel
+        - make
+
+    - name: clone rbenv
+      git:
+        repo: https://github.com/sstephenson/rbenv.git
+        dest: "{{ ansible_env.HOME }}/.rbenv"
+
+    - name: add rbenv path to .bash_profile
+      lineinfile:
+        dest: "~/.bash_profile"
+        line: "export PATH=$HOME/.rbenv/bin:$PATH"
+  
+    - name: add rbenv init to .bash_profile
+      lineinfile:
+        dest: "~/.bash_profile"
+        line: 'eval "$(rbenv init -)"'
+
+    - name: install rbenv-build
+      git: 
+        repo: https://github.com/sstephenson/ruby-build.git
+        dest: "{{ ansible_env.HOME }}/.rbenv/plugins/ruby-build"
