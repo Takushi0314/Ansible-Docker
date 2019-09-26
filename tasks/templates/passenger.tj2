@@ -3,12 +3,12 @@
 <VirtualHost *:80>
 #   ServerName {{ ansible_hostname }}
 
-   DocumentRoot {{ application_root }}/public
-   <Directory {{ application_root }}/public>
+   DocumentRoot {{ applications_root }}/{{ application_dir_name }}/public
+   <Directory {{ applications_root }}/{{ application_dir_name }}/public>
       RailsEnv {{ rails_env }}
       AllowOverride all
       Options -MultiViews
       # Uncomment this if you're on Apache >= 2.4:
-      # Require all granted
+      Require all granted
    </Directory>
 </VirtualHost>

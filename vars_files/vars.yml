@@ -5,11 +5,15 @@ postgresql_repo: https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86
 
 httpd_version: 2.4.6
 
+rbenv_home: /var/local/.rbenv
+
 ruby_version: 2.5.1
 
 bundler_version: 1.17.3
 
 passenger_version: 5.2.0
 
-application_root: /var/apps/test_app1
+applications_root: /var/myapps
+application_dir_name: app
+
 rails_env: test

@@ -1,5 +1,5 @@
 - hosts: ap
-  user: test
+  user: desktop
   gather_facts: yes
   vars_files:
     - ../vars_files/vars.yml
@@ -18,21 +18,24 @@
         - make
 
     - name: clone rbenv
+      become: true
       git:
         repo: https://github.com/sstephenson/rbenv.git
-        dest: "{{ ansible_env.HOME }}/.rbenv"
+        dest: "{{ rbenv_home }}/.rbenv"
 
-    - name: add rbenv path to .bash_profile
-      lineinfile:
-        dest: "~/.bash_profile"
-        line: "export PATH=$HOME/.rbenv/bin:$PATH"
-  
-    - name: add rbenv init to .bash_profile
-      lineinfile:
-        dest: "~/.bash_profile"
-        line: 'eval "$(rbenv init -)"'
+    - name: generate rbenv.sh and deploy
+      become: true
+      template:
+        src: rbenv.sh.tj2
+        dest: /etc/profile.d/rbenv.sh
 
-    - name: install rbenv-build
+    - name: source rbenv.sh
+      become: true
+      shell: source /etc/profile.d/rbenv.sh
+
+    - name: clone rbenv-build
+      become: true
       git: 
         repo: https://github.com/sstephenson/ruby-build.git
-        dest: "{{ ansible_env.HOME }}/.rbenv/plugins/ruby-build"
+        dest: "{{ rbenv_home }}/.rbenv/plugins/ruby-build"
+

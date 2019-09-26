@@ -1,30 +1,35 @@
 - hosts: ap
-  user: test
+  user: desktop
   gather_facts: yes
   vars_files:
     - ../vars_files/vars.yml
   tasks:
     - name: install rbenv-install
+      become: true
       shell: bash -lc 'CONFIGURE_OPTS="--disable-install-rdoc" rbenv install -s {{ ruby_version }}'
 
     - name: config global ruby version
+      become: true
       shell: bash -lc "rbenv global {{ ruby_version }} && rbenv rehash"
 
     - name: install bundler
+      become: true
       gem:
         name: bundler
         version: "{{ bundler_version }}"
         user_install: false
-        executable: "{{ ansible_env.HOME }}/.rbenv/shims/gem"
+        executable: "{{ rbenv_home }}/.rbenv/shims/gem"
 
     - name: install passenger
+      become: true
       gem:
         name: passenger
         version: "{{ passenger_version }}"
         user_install: false
-        executable: "{{ ansible_env.HOME }}/.rbenv/shims/gem"
+        executable: "{{ rbenv_home }}/.rbenv/shims/gem"
     
     - name: rbenv rehash
+      become: true
       shell: bash -lc "rbenv rehash"
 
     - name: install passenger-apache2 require module
@@ -42,9 +47,11 @@
         - apr-util-devel
 
     - name: passenger-install-apache2-module --auto --languages=ruby
+      become: true
       shell: bash -lc "passenger-install-apache2-module --auto --languages=ruby"
 
     - name: get passenger-apache2 config
+      become: true
       shell: bash -lc "passenger-install-apache2-module --snippet"
       register: httpd_conf_snippet
 
